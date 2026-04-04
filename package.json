@@ -1,17 +1,18 @@
 {
   "name": "accountancy-app-admin",
-  "version": "25.9.28",
+  "version": "26.4.403",
   "description": "Accountancy App Admin",
   "main": "main.js",
   "scripts": {
     "test": "jest",
+    "set-version": "node set-version.js",
     "start": "electron .",
     "clean:accountancy-app-admin": "if exist accountancy-app-admin rmdir /s /q accountancy-app-admin && mkdir accountancy-app-admin",
     "clean": "rimraf dist && npm run clean:accountancy-app-admin",
     "copy:angular-build": "npx copyfiles -u 4 ../accountancy-app-admin-ng16/dist/accountancy-app-admin/**/* accountancy-app-admin",
     "copy": "npm run clean && npm run copy:angular-build",
-    "publish": "npm run clean && npx electron-builder --publish always",
-    "build": " npm run copy && electron-builder"
+    "publish": "npm run set-version && npm run clean && npx electron-builder --publish always",
+    "build": "npm run set-version && npm run copy && electron-builder"
   },
   "repository": "https://github.com/netplusmrt/accountancy-app-admin-electron",
   "publish": {
