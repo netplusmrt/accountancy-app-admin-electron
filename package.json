@@ -1,0 +1,50 @@
+{
+  "name": "accountancy-app-admin",
+  "version": "25.9.27",
+  "description": "Accountancy App Admin",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest",
+    "start": "electron .",
+    "clean": "rimraf dist",
+    "clean:accountancy-app-admin": "if exist accountancy-app-admin rmdir /s /q accountancy-app-admin && mkdir accountancy-app-admin",
+    "copy:angular-build": "npx copyfiles -u 4 ../accountancy-app-admin-ng16/dist/accountancy-app-admin/**/* accountancy-app-admin",
+    "copy": "npm run clean && npm run clean:accountancy-app-admin && npm run copy:angular-build",
+    "publish": "npm run clean && npx electron-builder --publish always",
+    "build": " npm run copy && electron-builder"
+  },
+  "repository": "https://github.com/netplusmrt/accountancy-app-admin-electron",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
+  "build": {
+    "appId": "com.netplusmrt.accountancyappadmin",
+    "productName": "AccountancyAppAdmin",
+    "icon": "assets/icon.ico",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "artifactName": "AccountancyAppAdmin-Setup-${version}.exe"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    }
+  },
+  "author": "AccountancyAppAdmin",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8",
+    "electron-debug": "^4.1.0",
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "electron-log": "^5.3.0",
+    "electron-updater": "^6.3.9"
+  }
+}
