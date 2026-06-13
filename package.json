@@ -1,6 +1,6 @@
 {
   "name": "accountancy-app-admin",
-  "version": "26.6.303",
+  "version": "26.6.1303",
   "description": "Accountancy App Admin",
   "main": "main.js",
   "scripts": {
