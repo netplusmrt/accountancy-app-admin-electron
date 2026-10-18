@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, dialog, ipcMain} = require('electron')
+const { execFile } = require('child_process')
 const path = require('path')
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater')
@@ -7,6 +8,39 @@ const log = require("electron-log");
 const url = require("url");
 
 let mainWindow
+
+const impersonationScriptPath = path.join(
+  'E:\\Apps\\AccountancyApp\\accountancy-app-firestore-backup',
+  'accountancy-app-production-backup',
+  'create-Impersonation-token.js'
+);
+
+ipcMain.handle('create-impersonation-token', (event, uid) => {
+  const senderUrl = event.senderFrame?.url || '';
+  const trustedSender = app.isPackaged
+    ? senderUrl.startsWith('file://')
+    : senderUrl.startsWith('http://localhost:4200/');
+
+  if (!trustedSender) {
+    throw new Error('Impersonation can only be started from the admin app.');
+  }
+  if (typeof uid !== 'string' || !uid.trim()) {
+    throw new Error('Select a user before starting impersonation.');
+  }
+  if (!fs.existsSync(impersonationScriptPath)) {
+    throw new Error(`Impersonation script not found: ${impersonationScriptPath}`);
+  }
+
+  return new Promise((resolve, reject) => {
+    execFile('node', [impersonationScriptPath, uid.trim()], { windowsHide: true }, (error, _stdout, stderr) => {
+      if (error) {
+        reject(new Error(stderr.trim() || error.message));
+        return;
+      }
+      resolve({ success: true });
+    });
+  });
+});
 
 function createWindow () {
   mainWindow = new BrowserWindow({
