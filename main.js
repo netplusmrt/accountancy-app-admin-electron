@@ -15,7 +15,7 @@ const impersonationScriptPath = path.join(
   'create-Impersonation-token.js'
 );
 
-ipcMain.handle('create-impersonation-token', (event, uid) => {
+ipcMain.handle('create-impersonation-token', (event, uid, incognito = false) => {
   const senderUrl = event.senderFrame?.url || '';
   const trustedSender = app.isPackaged
     ? senderUrl.startsWith('file://')
@@ -27,12 +27,15 @@ ipcMain.handle('create-impersonation-token', (event, uid) => {
   if (typeof uid !== 'string' || !uid.trim()) {
     throw new Error('Select a user before starting impersonation.');
   }
+  if (typeof incognito !== 'boolean') {
+    throw new Error('Incognito mode must be enabled or disabled.');
+  }
   if (!fs.existsSync(impersonationScriptPath)) {
     throw new Error(`Impersonation script not found: ${impersonationScriptPath}`);
   }
 
   return new Promise((resolve, reject) => {
-    execFile('node', [impersonationScriptPath, uid.trim()], { windowsHide: true }, (error, _stdout, stderr) => {
+    execFile('node', [impersonationScriptPath, uid.trim(), String(incognito)], { windowsHide: true }, (error, _stdout, stderr) => {
       if (error) {
         reject(new Error(stderr.trim() || error.message));
         return;

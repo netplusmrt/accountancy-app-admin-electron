@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electron", {
-  createImpersonationToken: (uid) => ipcRenderer.invoke("create-impersonation-token", uid),
+  createImpersonationToken: (uid, incognito) => ipcRenderer.invoke("create-impersonation-token", uid, incognito),
   send: (channel, data) => ipcRenderer.send(channel, data),
   receive: (channel, callback) => {
     ipcRenderer.on(channel, (event, ...args) => callback(...args));
