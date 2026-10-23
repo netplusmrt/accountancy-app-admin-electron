@@ -10,8 +10,8 @@ const url = require("url");
 let mainWindow
 
 const impersonationScriptPath = path.join(
-  'E:\\Apps\\AccountancyApp\\accountancy-app-firestore-backup',
-  'accountancy-app-production-backup',
+  'E:\\Apps\\AccountancyApp\\accountancy-app-firestore',
+  'accountancy-app-production',
   'create-Impersonation-token.js'
 );
 
