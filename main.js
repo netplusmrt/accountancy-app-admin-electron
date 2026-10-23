@@ -9,11 +9,49 @@ const url = require("url");
 
 let mainWindow
 
-const impersonationScriptPath = path.join(
+const defaultImpersonationScriptPath = path.join(
   'E:\\Apps\\AccountancyApp\\accountancy-app-firestore',
   'accountancy-app-production',
   'create-Impersonation-token.js'
 );
+
+function getRuntimeConfigPath() {
+  return path.join(app.getPath('userData'), 'runtime-config.json');
+}
+
+function ensureRuntimeConfig() {
+  const configPath = getRuntimeConfigPath();
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+
+  if (!fs.existsSync(configPath)) {
+    fs.writeFileSync(configPath, JSON.stringify({
+      impersonationScriptPath: defaultImpersonationScriptPath
+    }, null, 2) + '\n');
+  }
+
+  log.info(`Runtime config: ${configPath}`);
+}
+
+function getImpersonationScriptPath() {
+  const configPath = getRuntimeConfigPath();
+  let config;
+
+  try {
+    config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  } catch (error) {
+    throw new Error(`Unable to read runtime config at ${configPath}: ${error.message}`);
+  }
+
+  const scriptPath = config?.impersonationScriptPath;
+  if (typeof scriptPath !== 'string' || !scriptPath.trim()) {
+    throw new Error(`Set impersonationScriptPath in ${configPath}.`);
+  }
+  if (!path.isAbsolute(scriptPath)) {
+    throw new Error(`impersonationScriptPath must be an absolute path in ${configPath}.`);
+  }
+
+  return scriptPath;
+}
 
 ipcMain.handle('create-impersonation-token', (event, uid, incognito = false) => {
   const senderUrl = event.senderFrame?.url || '';
@@ -30,8 +68,9 @@ ipcMain.handle('create-impersonation-token', (event, uid, incognito = false) => 
   if (typeof incognito !== 'boolean') {
     throw new Error('Incognito mode must be enabled or disabled.');
   }
+  const impersonationScriptPath = getImpersonationScriptPath();
   if (!fs.existsSync(impersonationScriptPath)) {
-    throw new Error(`Impersonation script not found: ${impersonationScriptPath}`);
+    throw new Error(`Impersonation script not found: ${impersonationScriptPath}. Update runtime-config.json to change its path.`);
   }
 
   return new Promise((resolve, reject) => {
@@ -46,6 +85,7 @@ ipcMain.handle('create-impersonation-token', (event, uid, incognito = false) => 
 });
 
 function createWindow () {
+  ensureRuntimeConfig();
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
